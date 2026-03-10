@@ -1,0 +1,11 @@
+@2026 justicsoft
+CROTCH - cross platfrom fetch
+
+a tui implementation of an file manager, like dolphin for the cli
+
+made for class, all hail the knapp
+-- PREAMBLE END --
+
+-- SOURCES BEGIN --
+notcurses general api usage - https://github.com/dankamongmen/notcurses/blob/master/USAGE.md
+
