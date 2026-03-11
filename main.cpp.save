@@ -25,37 +25,8 @@ ncplane_options scropt { // constant structure representing the options for ncpl
  row, // rows
  col  // cols
 };
-struct ncplane* bgp = ncplane_create(notcurses_stdplane(nc), &scropt);
 struct ncplane* screen = ncplane_create(notcurses_stdplane(nc), &scropt);
 //const char* butt = "THE TEXT IS WORKING!!!!"; -- REFRENCE, how to format strings to shove into functions
-timespec ts; // create timespec to update get every 100ms
-ts.tv_sec = 0;
-ts.tv_nsec = 100000000;
-// define image blit &bglayer
-ncplane_options bgopt {
- 0,
- 0,
- row,
- col
-};
-ncplane_move_bottom(bgp);
-const char* bimgp = "./assets/crotch.png";
-ncvisual* bimg = ncvisual_from_file(bimgp);
-const ncvisual_options bopt {
- bgp, // ncplane
- NCSCALE_STRETCH, // scale
- 0, // y
- 0, // x
- 0, // begy
- 0, // begx
- 0, // leny
- 0, // lenx
- NCBLIT_DEFAULT,
- 0
-};
-//ncvisual_resize(bimg, row, col);
-ncvisual_blit(nc, bimg, &bopt);
-notcurses_render(nc);
 //define menu items, sections & options (IN THAT ORDER!!)
 ncmenu_item nitems[] = { // double bracket'd array to pass multiple vars (new items)
  { "Folder |", 'F' }, // description, shortcut
@@ -82,15 +53,27 @@ struct ncmenu* menubar = ncmenu_create(screen, &mopts);
 ncinput ids;
 // ENDING CALLS
 while(true) { // render loop
-uint32_t c = notcurses_get_nblock(nc, &in); // grab any input & shove into the in struct
+uint32_t c = notcurses_get(nc, NULL, &in); // grab any input & shove into the in struct
 if(c == '`') break; // kill program if escape key detected
-if(c) {
 ncmenu_offer_input(menubar, &in); // enable mice for tempmen@the in array
 ncmenu_mouse_selected(menubar, &in, &ids);
 uint32_t sel = ids.id; // extrect id of selected option
 char ascii = sel; // convert to char to compare
-if(ascii == 'E') break; }
-notcurses_render(nc);
+if(ascii == 'D') { // switch statments wont work for this for some reason..
+ ncplane_options dopt;
+ dopt.x = col / 2 - 15;
+ dopt.y = row / 2 - 1;
+ dopt.rows = 1;
+ dopt.cols = 100;
+ struct ncplane* dp = ncplane_create(screen, &dopt);
+ const char* msg = "this is where its located";
+ ncplane_putstr_yx(dp, 0, 0, msg);
+} else if(ascii == 'E') {
+ break;
+}
+if(notcurses_render(nc) != 0) {
+ return 1;
+}
 }
 int sd = notcurses_stop(nc); // stop detect
 return 0; // return successful program execution
