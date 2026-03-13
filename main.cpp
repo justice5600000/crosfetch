@@ -103,14 +103,18 @@ if(c) { // if input is availible (optimized)
  // MENU OPTIONS
  if(ascii == 'E') break; // exit crotch
  if(ascii == 'D') { // open directory
-  ncplane_options dcopt { // dirchooser opts
-    row/2, // y
-    col/2, // x
-    1, // rows
-    col - col/4 // cols
-  };
-  struct ncplane* dc = ncplane_create(screen, &dcopt);
-  ncplane_putstr_yx(dc, 0, 0, "where dirchooser appears to be <--");
+//  ncplane_options dcopt { // dirchooser opts
+//    row/2, // y
+//    col/2 - col/4, // x
+//    1, // rows
+//    col - col/4 // cols
+//  };
+    ncreader_options ropt {
+     0,
+     0,
+     false
+    };
+    ncreader* read = ncreader_create(screen, &ropt);
  }
 }
 notcurses_render(nc); // render all planes to screen
