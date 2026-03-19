@@ -102,11 +102,27 @@ std::vector<std::string> files = getrootlist();
 ncselector_item itemarray[files.size()]; // create one item struct for every entry in files
 //array[item].variuble = content // how to access theese items
 for(int i = 0; i < files.size(); i++) { // INITILIZE ITEMS
- itemarray[i].id = i; // make the items at the current number's id the same as the current number
- itemarray[i].name = files[i]; // make the item at the current number's filename the file at the current number
+ const char* idk = files[i].c_str();
+ itemarray[i].option = idk; // make the item at the current number's filename the file at the current number
 }
+ncselector_options fpopt { // file picker opts
+ "FILES",
+ "SECONDARY",
+ "FOOTER",
+ &itemarray[1],
+ 1,
+ 10,
+ 1,
+ 1,
+ 1,
+ 1,
+ 1,
+ 0
+};
+struct ncselector* filesec = ncselector_create(screen, &fpopt);
 
-
+// tracking int's's's'
+int selectoropen = 0;
 // ENDING CALLS
 while(true) { // render loop
 uint32_t c = notcurses_get_nblock(nc, &in); // grab any input & shove into the in struct (without blocking)
@@ -119,7 +135,6 @@ if(c) { // if input is availible (optimized)
  // MENU OPTIONS
  if(ascii == 'E') break; // exit crotch
  if(ascii == 'D') { // open directory
-  
  }
 }
 notcurses_render(nc); // render all planes to screen
