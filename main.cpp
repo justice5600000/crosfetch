@@ -4,6 +4,18 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <string>
+#include <vector>
+#include <filesystem>
+
+std::vector<std::string> getrootlist() {
+ std::vector<std::string> list;
+ std::string root = "/";
+ for(const auto & entry : std::filesystem::directory_iterator(root)) { // megabrain c++ logic i dont understand (https://stackoverflow.com/questions/612097/how-can-i-get-the-list-of-files-in-a-directory-using-c-or-c)
+  list.push_back(entry.path());
+ }
+
+ return list;
+}
 
 int main() {
 //BOILERPLATE - initilize all the bs holding the program together
@@ -85,10 +97,14 @@ ncmenu_options mopts{ // menu options
 // define menu(s)
 struct ncmenu* menubar = ncmenu_create(screen, &mopts);
 ncinput ids; // ncinput var to hold the shortcut of the selected menu
-
-
-
-
+// define selector(s)
+std::vector<std::string> files = getrootlist();
+ncselector_item itemarray[files.size()]; // create one item struct for every entry in files
+//array[item].variuble = content // how to access theese items
+for(int i = 0; i < files.size(); i++) { // INITILIZE ITEMS
+ itemarray[i].id = i; // make the items at the current number's id the same as the current number
+ itemarray[i].name = files[i]; // make the item at the current number's filename the file at the current number
+}
 
 
 // ENDING CALLS
@@ -103,18 +119,7 @@ if(c) { // if input is availible (optimized)
  // MENU OPTIONS
  if(ascii == 'E') break; // exit crotch
  if(ascii == 'D') { // open directory
-//  ncplane_options dcopt { // dirchooser opts
-//    row/2, // y
-//    col/2 - col/4, // x
-//    1, // rows
-//    col - col/4 // cols
-//  };
-    ncreader_options ropt {
-     0,
-     0,
-     false
-    };
-    ncreader* read = ncreader_create(screen, &ropt);
+  
  }
 }
 notcurses_render(nc); // render all planes to screen
