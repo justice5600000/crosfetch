@@ -1,1 +1,1 @@
-g++ ../colorimg.cpp -L/usr/local/lib -lnotcurses -lnotcurses-core -finput-charset=UTF-8
+g++ ../baseplate.cpp -L/usr/local/lib -lnotcurses -lnotcurses-core -finput-charset=UTF-8
