@@ -103,7 +103,7 @@ ncmenu_options mopts{ // menu options
 ncinput ids; // ncinput var to hold the shortcut of the selected menu
 // define selector(s)
 std::vector<std::string> files = getrootlist();
-ncselector_item itemarray[files.size()]; // create one item struct for every entry in files
+ncselector_item itemarray[files.size() + 1]; // create one item struct for every entry in files
 //array[item].variuble = content // how to access theese items
 int c = 0;
 for(int i = 0; i < files.size(); i++) { // INITILIZE ITEMS
@@ -113,8 +113,8 @@ for(int i = 0; i < files.size(); i++) { // INITILIZE ITEMS
  c++;
 }
 // nullpoint the last options
-itemarray[c].option = nullptr;
-itemarray[c].desc = nullptr;
+itemarray[files.size()].option = nullptr;
+itemarray[files.size()].desc = nullptr;
 // define and shoot out stupidsel to fix color
 //ncselector_options stopt { "THIS", "FIXESTHEBACKGROUND", "SOMEHOW", &itemarray[1], 1, 10, 1, 1, 1, 1, 1, 0 };
 //struct ncselector* filesec = ncselector_create(screen, &stopt);
@@ -149,6 +149,7 @@ ncplane_move_top(screen);
 // predefine structs
 ncplane* selectorplane = nullptr;
 ncselector* ssec = nullptr;
+char* d;
 // render loop
 while(true) {
 uint32_t c = notcurses_get_nblock(nc, &in); // grab any input & shove into the in struct (without blocking)
@@ -167,7 +168,8 @@ if(c) { // if input is availible (optimized)
     ncplane_move_top(selectorplane);
  }
  if(ascii == 'C' && ssec != nullptr) {
-   ncplane_move_bottom(selectorplane);
+   ncselector_destroy(ssec, &d);
+   ncplane_destroy(selectorplane);
  }
 }
 ncvisual_blit(nc, bimg, &bopt);
