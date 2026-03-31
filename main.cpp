@@ -118,27 +118,14 @@ itemarray[files.size()].desc = nullptr;
 // define and shoot out stupidsel to fix color
 //ncselector_options stopt { "THIS", "FIXESTHEBACKGROUND", "SOMEHOW", &itemarray[1], 1, 10, 1, 1, 1, 1, 1, 0 };
 //struct ncselector* filesec = ncselector_create(screen, &stopt);
-// main selectors
-ncselector_options fpopt {};
-fpopt.title = "Open file/";
-fpopt.secondary = "el secondary";
-fpopt.footer = "the feeter";
-fpopt.items = itemarray;
-fpopt.defidx = 0;
-ncplane_options spopt {}; // selectorplane opts
-spopt.rows = row / 2;
-spopt.cols = col / 2;
-spopt.y = (row - spopt.rows) / 2;
-spopt.x = (col - spopt.cols) / 2;
-//ncplane* selectorplane = ncplane_create(screen, &spopt);
-//ncplane_set_base(selectorplane, "2x", 0, 0x202020); 
-//ncselector* ssec  = ncselector_create(selectorplane, &fpopt);
-
-// tracking int's's's'
-int selectoropen = 0;
+ncplane_options mansel {}; // manual selector (yay!)
+mansel.y = row / 4;
+mansel.x = col / 4;
+mansel.rows = 25;
+mansel.cols = col / 2; // width set to exactly half of screen
 // ENDING CALLS
-
-
+int m1o = 0; // menu one open
+ncplane* idk = nullptr;
 
 
 
@@ -146,30 +133,31 @@ int selectoropen = 0;
 struct ncmenu* menubar = ncmenu_create(screen, &mopts);
 ncplane_move_bottom(bgplane);
 ncplane_move_top(screen);
-// predefine structs
-ncplane* selectorplane = nullptr;
-ncselector* ssec = nullptr;
 char* d;
 // render loop
 while(true) {
 uint32_t c = notcurses_get_nblock(nc, &in); // grab any input & shove into the in struct (without blocking)
 if(c == '`') break; // kill program if escape key detected 
-if(c) { // if input is availible (optimized)
+if(c) {
  ncmenu_offer_input(menubar, &in); // enable mouse input for menubar
  ncmenu_mouse_selected(menubar, &in, &ids); // put the id of selected menu item in ids
  uint32_t sel = ids.id; // extrect id of selected option
  char ascii = sel; // convert to char to compare
  // MENU OPTIONS
  if(ascii == 'E') break; // exit crotch
- if(ascii == 'D' && (in.evtype & NCKEY_BUTTON1) != 0) { // open directory
-    selectorplane = ncplane_create(screen, &spopt);
-    ncplane_set_base(selectorplane, " ", 0, 0x202020);
-    ssec  = ncselector_create(selectorplane, &fpopt);
-    ncplane_move_top(selectorplane);
+ if(ascii == 'D' && (in.evtype & NCKEY_BUTTON1) != 0) {
+   if(m1o == 0) {
+   idk = ncplane_create(screen, &mansel);
+   ncplane_move_top(idk);
+   ncplane_set_base(idk, " ", 0, 0);
+   m1o = 1;
+  }
  }
- if(ascii == 'C' && ssec != nullptr) {
-   ncselector_destroy(ssec, &d);
-   ncplane_destroy(selectorplane);
+ if(ascii == 'C' && (in.evtype & NCKEY_BUTTON1) != 0) {
+  if(m1o == 1) {
+   ncplane_destroy(idk);
+   idk = nullptr;
+  }
  }
 }
 ncvisual_blit(nc, bimg, &bopt);
