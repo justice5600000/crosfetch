@@ -138,7 +138,7 @@ char* d;
 // render loop
 while(true) {
 uint32_t c = notcurses_get_nblock(nc, &in); // grab any input & shove into the in struct (without blocking)
-if(c == '`') break; // kill program if escape key detected 
+if(c == '`') break; // kill program if escape key detected
 if(c) {
  ncmenu_offer_input(menubar, &in); // enable mouse input for menubar
  ncmenu_mouse_selected(menubar, &in, &ids); // put the id of selected menu item in ids
@@ -147,13 +147,17 @@ if(c) {
  // MENU OPTIONS
  if(ascii == 'E') break; // exit crotch
  if(ascii == 'D' && (in.evtype & NCKEY_BUTTON1) != 0) {
-  if(!idk) {
-  m1o = gen_filsel(m1o, idk, screen, mansel);
+   if(m1o == 0) {
+   idk = ncplane_create(screen, &mansel);
+   ncplane_move_top(idk);
+   ncplane_set_base(idk, " ", 0, 0);
+   m1o = 1;
   }
-}
+ }
  if(ascii == 'C' && (in.evtype & NCKEY_BUTTON1) != 0) {
-  if(idk) {
-  m1o = gen_filsel(m1o, idk, screen, mansel);
+  if(m1o == 1) {
+   ncplane_destroy(idk);
+   idk = nullptr;
   }
  }
 }

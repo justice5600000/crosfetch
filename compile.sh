@@ -1,1 +1,1 @@
-g++ main.cpp -L/usr/local/lib -lnotcurses -lnotcurses-core -finput-charset=UTF-8
+g++ ./*.cpp -L/usr/local/lib -lnotcurses -lnotcurses-core -finput-charset=UTF-8

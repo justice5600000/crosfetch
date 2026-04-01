@@ -1,3 +1,0 @@
-make reading the dir and shoving into a list a func, try to make the 
-resulting array/vector/idk stable so it can be closed without FUCKING SEGFAULTING
-atleast the menu opening is stable now
