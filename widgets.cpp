@@ -1,7 +1,7 @@
 #include "widgets.h"
 #include <notcurses/notcurses.h>
 
-int gen_filsel(int oc, ncplane*& fsp, ncplane* pp, ncplane_options fso) {
+int gen_filsel(int oc, ncplane*& fsp, ncplane* pp, ncplane_options fso) { // open counter, file selector plane(passed as refrence *&), parent plane, fsp options
  if(oc == 0) {
   fsp = ncplane_create(pp, &fso);
   ncplane_move_top(fsp);
@@ -15,3 +15,4 @@ int gen_filsel(int oc, ncplane*& fsp, ncplane* pp, ncplane_options fso) {
 
  return oc;
 }
+

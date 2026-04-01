@@ -102,23 +102,8 @@ ncmenu_options mopts{ // menu options
 };
 // define menu(s)
 ncinput ids; // ncinput var to hold the shortcut of the selected menu
-// define selector(s)
+// define FILE selector(s)
 std::vector<std::string> files = getrootlist();
-ncselector_item itemarray[files.size() + 1]; // create one item struct for every entry in files
-//array[item].variuble = content // how to access theese items
-int c = 0;
-for(int i = 0; i < files.size(); i++) { // INITILIZE ITEMS
- const char* idk = files[i].c_str();
- itemarray[i].option = idk; // make the item at the current number's filename the file at the current number
- itemarray[i].desc = "file                                                    ";
- c++;
-}
-// nullpoint the last options
-itemarray[files.size()].option = nullptr;
-itemarray[files.size()].desc = nullptr;
-// define and shoot out stupidsel to fix color
-ncselector_options stopt { "THIS", "FIXESTHEBACKGROUND", "SOMEHOW", &itemarray[1], 1, 10, 1, 1, 1, 1, 1, 0 };
-struct ncselector* filesec = ncselector_create(screen, &stopt);
 ncplane_options mansel {}; // manual selector (yay!)
 mansel.y = row / 4;
 mansel.x = col / 4;
@@ -135,6 +120,10 @@ struct ncmenu* menubar = ncmenu_create(screen, &mopts);
 ncplane_move_bottom(bgplane);
 ncplane_move_top(screen);
 char* d;
+// fileselector vars
+std::string hover = "[ ]";
+std::string sel = "[*]";
+int selected = 0;
 // render loop
 while(true) {
 uint32_t c = notcurses_get_nblock(nc, &in); // grab any input & shove into the in struct (without blocking)
@@ -155,6 +144,22 @@ if(c) {
   if(idk) {
   m1o = gen_filsel(m1o, idk, screen, mansel);
   }
+ }
+}
+if(idk) {
+ for(int i = 0; i < mansel.rows; i++) {
+  if(i == selected) {
+   std::string temp = "[*] " + files[i];
+   ncplane_putstr_yx(idk, i, 0, temp.c_str());
+  } else {
+  ncplane_putstr_yx(idk, i, 0, files[i].c_str());
+  }
+ }
+ if(c == 's') {
+  if(selected != 0) selected--;
+ }
+ if(c == 'w') {
+  selected++;
  }
 }
 ncvisual_blit(nc, bimg, &bopt);
