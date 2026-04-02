@@ -6,12 +6,12 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <algorithm>
 #include "widgets.h"
 
-std::vector<std::string> getrootlist() {
+std::vector<std::string> getdir(std::string in) {
  std::vector<std::string> list;
- std::string root = "/";
- for(const auto & entry : std::filesystem::directory_iterator(root)) { // megabrain c++ logic i dont understand (https://stackoverflow.com/questions/612097/how-can-i-get-the-list-of-files-in-a-directory-using-c-or-c)
+ for(const auto & entry : std::filesystem::directory_iterator(in)) { // megabrain c++ logic i dont understand (https://stackoverflow.com/questions/612097/how-can-i-get-the-list-of-files-in-a-directory-using-c-or-c)
   list.push_back(entry.path());
  }
 
@@ -45,12 +45,12 @@ timespec ts; // create timespec to update get every 100ms
 ts.tv_sec = 0; // every second
 ts.tv_nsec = 100000000; // every one 100 million nanoseconds (100ms)
 // define image blit &bglayer
-ncplane_options bgopt {};
-bgopt.y = 0;
-bgopt.x = 0;
-bgopt.rows = row;
-bgopt.cols = col;
-ncplane* bgplane = ncplane_create(notcurses_stdplane(nc), &bgopt);
+ncplane_options bgopt {}; // initilize background (image) options
+bgopt.y = 0; // y
+bgopt.x = 0; // x
+bgopt.rows = row; // height
+bgopt.cols = col; // length
+ncplane* bgplane = ncplane_create(notcurses_stdplane(nc), &bgopt); // create plane using the standard plane as its parent, pass a pointer to the options
 const char* bimgp = "./assets/crotch.png"; // path to background image
 ncvisual* bimg = ncvisual_from_file(bimgp); // load ncvisual from the image located at bimgp
 const ncvisual_options bopt { // bgoptions
@@ -103,26 +103,28 @@ ncmenu_options mopts{ // menu options
 // define menu(s)
 ncinput ids; // ncinput var to hold the shortcut of the selected menu
 // define FILE selector(s)
-std::vector<std::string> files = getrootlist();
+std::string root = "/";
+std::vector<std::string> files = getdir(root);
 ncplane_options mansel {}; // manual selector (yay!)
-mansel.y = row / 4;
-mansel.x = col / 4;
-mansel.rows = 25;
+mansel.y = row / 4; // y ( set to one fourth of the screens height
+mansel.x = col / 4; // x ^
+mansel.rows = 25; // length
 mansel.cols = col / 2; // width set to exactly half of screen
 // ENDING CALLS
 int m1o = 0; // menu one open
-ncplane* idk = nullptr;
+ncplane* idk = nullptr; // make default value of fileselector null (RENAME PLS)
 
 
 
 
-struct ncmenu* menubar = ncmenu_create(screen, &mopts);
-ncplane_move_bottom(bgplane);
-ncplane_move_top(screen);
-char* d;
+struct ncmenu* menubar = ncmenu_create(screen, &mopts); // create menu using the screen plane as a parent
+ncplane_move_bottom(bgplane); // move the background to the bottom of the pile
+ncplane_move_top(screen); // move the screen to the top of the pile
+char* d; //!!!!!!! unused(?)
 // fileselector vars
-std::string hover = "[ ]";
-std::string sel = "[*]";
+std::string selected_s;
+std::string temp;
+int inputbuf = 0;
 int selected = 0;
 // render loop
 while(true) {
@@ -146,20 +148,35 @@ if(c) {
   }
  }
 }
-if(idk) {
- for(int i = 0; i < mansel.rows; i++) {
-  if(i == selected) {
-   std::string temp = "[*] " + files[i];
-   ncplane_putstr_yx(idk, i, 0, temp.c_str());
-  } else {
-  ncplane_putstr_yx(idk, i, 0, files[i].c_str());
+if(idk) { // file selector logic
+ ncplane_erase(idk); // erase everything before drawing to remove duplicates
+ for(int i = 0; i < std::min(files.size(), (size_t)mansel.rows); i++) { // for every row in the selector
+  if(i == selected) { // if the cursors position equals the current file
+   selected_s = files[i];
+   temp = "[*] " + files[i]; // make a new string with the selected icon and attach the file
+   ncplane_putstr_yx(idk, i, 0, temp.c_str()); // draw the string to the selector
+  } else { // if the current file isnt the selected file
+  temp = "[ ] " + files[i]; // do the same as before execpt with a not selected icon
+  ncplane_putstr_yx(idk, i, 0, temp.c_str());
+  }
+ }
+ if(c == 'w') {
+  inputbuf++;
+  if(inputbuf == 2) {
+   if(selected != 0) selected--;
+   inputbuf = 0;
   }
  }
  if(c == 's') {
-  if(selected != 0) selected--;
+  inputbuf++;
+  if(inputbuf == 2) {
+   selected++;
+   inputbuf = 0;
+  }
  }
- if(c == 'w') {
-  selected++;
+ if(c == 'm') {
+  files = getdir(selected_s);
+  selected = 0;
  }
 }
 ncvisual_blit(nc, bimg, &bopt);
