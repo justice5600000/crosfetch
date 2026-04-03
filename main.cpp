@@ -51,8 +51,8 @@ bgopt.x = 0; // x
 bgopt.rows = row; // height
 bgopt.cols = col; // length
 ncplane* bgplane = ncplane_create(notcurses_stdplane(nc), &bgopt); // create plane using the standard plane as its parent, pass a pointer to the options
-const char* bimgp = "./assets/crotch.png"; // path to background image
-ncvisual* bimg = ncvisual_from_file(bimgp); // load ncvisual from the image located at bimgp
+std::string bimgp = "./assets/crotch.png"; // path to background image
+ncvisual* bimg = ncvisual_from_file(bimgp.c_str()); // load ncvisual from the image located at bimgp
 const ncvisual_options bopt { // bgoptions
  bgplane, // ncplane
  NCSCALE_STRETCH, // scale
@@ -104,6 +104,7 @@ ncmenu_options mopts{ // menu options
 ncinput ids; // ncinput var to hold the shortcut of the selected menu
 // define FILE selector(s)
 std::string root = "/";
+int rootlen = root.length();
 std::vector<std::string> files = getdir(root);
 ncplane_options mansel {}; // manual selector (yay!)
 mansel.y = row / 4; // y ( set to one fourth of the screens height
@@ -122,7 +123,7 @@ ncplane_move_bottom(bgplane); // move the background to the bottom of the pile
 ncplane_move_top(screen); // move the screen to the top of the pile
 char* d; //!!!!!!! unused(?)
 // fileselector vars
-std::string selected_s;
+std::string cfile;
 std::string temp;
 int inputbuf = 0;
 int selected = 0;
@@ -137,6 +138,12 @@ if(c) {
  char ascii = sel; // convert to char to compare
  // MENU OPTIONS
  if(ascii == 'E') break; // exit crotch
+ if(ascii == 'B') {
+  if(bimg) {
+  ncvisual_destroy(bimg);
+  bimg = nullptr;
+  }
+ }
  if(ascii == 'D' && (in.evtype & NCKEY_BUTTON1) != 0) {
   if(!idk) {
   m1o = gen_filsel(m1o, idk, screen, mansel);
@@ -148,18 +155,8 @@ if(c) {
   }
  }
 }
-if(idk) { // file selector logic
- ncplane_erase(idk); // erase everything before drawing to remove duplicates
- for(int i = 0; i < std::min(files.size(), (size_t)mansel.rows); i++) { // for every row in the selector
-  if(i == selected) { // if the cursors position equals the current file
-   selected_s = files[i];
-   temp = "[*] " + files[i]; // make a new string with the selected icon and attach the file
-   ncplane_putstr_yx(idk, i, 0, temp.c_str()); // draw the string to the selector
-  } else { // if the current file isnt the selected file
-  temp = "[ ] " + files[i]; // do the same as before execpt with a not selected icon
-  ncplane_putstr_yx(idk, i, 0, temp.c_str());
-  }
- }
+if(idk) { // if the file selector is open
+ cfile = update_filsel(idk, files, mansel.rows, selected, root, rootlen); // menu drawing logic
  if(c == 'w') {
   inputbuf++;
   if(inputbuf == 2) {
@@ -175,9 +172,20 @@ if(idk) { // file selector logic
   }
  }
  if(c == 'm') {
-  files = getdir(selected_s);
-  selected = 0;
+  std::filesystem::path path(cfile);
+  std::error_code ec;
+  if(std::filesystem::is_directory(path, ec)) { // if nonfolder selected
+   root = cfile;
+   rootlen = cfile.length();
+   inputbuf++;
+   if(inputbuf == 2) {
+    files = getdir(cfile);
+    selected = 0;
+    inputbuf = 0;
+   }
+  }
  }
+ 
 }
 ncvisual_blit(nc, bimg, &bopt);
 notcurses_render(nc); // render all planes to screen
