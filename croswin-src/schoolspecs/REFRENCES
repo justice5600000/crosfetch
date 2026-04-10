@@ -1,0 +1,15 @@
+to limit the technical debt
+
+NC TYPEDEF DEFNITING TEMPLATE (must be defined assmilar tew this)
+  ncmenu_item items[] = {
+    { .desc = "Item 1", .shortcut = '1' },
+    { .desc = "Item 2", .shortcut = '2' },
+  };
+  ncmenu_section sections[] = {
+    {
+      .name = "Menu",
+      .items = items,
+      .itemcount = 2
+    }
+  };
+they are big arrays, hook into the vars w/ . then the name.
